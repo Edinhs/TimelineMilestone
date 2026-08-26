@@ -1,0 +1,15 @@
+{
+  "name": "timeline-studio",
+  "version": "0.3.0",
+  "description": "Gerador de cronogramas de programa (Gantt + milestones) como aplicativo offline de arquivo único — substituto do Schedule Generator Tool (.xlsm)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run.mjs",
+    "test:engine": "node tests/test-engine.mjs",
+    "test:ui": "node tests/test-ui.mjs",
+    "lint": "node tests/check-syntax.mjs"
+  },
+  "devDependencies": { "jsdom": "^24.0.0" },
+  "license": "UNLICENSED"
+}

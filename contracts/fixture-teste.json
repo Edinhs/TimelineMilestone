@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "name": "TESTE",
+    "last_update": "August/2026",
+    "chart_start": "2025-05-01",
+    "chart_end": "2029-02-28",
+    "today": "2026-08-15",
+    "show_today_line": true,
+    "duration_unit": "W",
+    "logo_path": null
+  },
+  "milestones": [
+    { "id": "PM",   "label": "PM",   "date": "2025-08-10", "style": "gate",  "show_line": false },
+    { "id": "CM",   "label": "CM",   "date": "2025-10-05", "style": "gate",  "show_line": false },
+    { "id": "SFM",  "label": "SFM",  "date": "2026-12-15", "style": "gate",  "show_line": true },
+    { "id": "SHRM", "label": "SHRM", "date": "2027-05-10", "style": "gate",  "show_line": true },
+    { "id": "X0",   "label": "X0",   "date": "2028-01-17", "style": "xgate", "show_line": true, "show_marker": true },
+    { "id": "X1",   "label": "X1",   "date": "2028-04-10", "style": "xgate", "show_line": true, "show_marker": true },
+    { "id": "X2",   "label": "X2",   "date": "2028-08-14", "style": "xgate", "show_line": true, "show_marker": true },
+    { "id": "X3",   "label": "X3",   "date": "2028-10-09", "style": "xgate", "show_line": true, "show_marker": true },
+    { "id": "SOPM", "label": "SOPM", "date": "2028-11-20", "style": "gate",  "show_line": false }
+  ],
+  "groups": [
+    { "id": "g1", "label": "1", "order": 0 },
+    { "id": "g2", "label": "2", "order": 1 }
+  ],
+  "components": [
+    { "id": "c-audio-base-1",    "name": "Audio base",       "group_id": "g1", "order": 0 },
+    { "id": "c-audio-prem-1",    "name": "Audio premium",    "group_id": "g1", "order": 1 },
+    { "id": "c-cluster-1",       "name": "Cluster 7\" & 10\"", "group_id": "g1", "order": 2 },
+    { "id": "c-dcsd-1",          "name": "DCSD 12.3\"",      "group_id": "g1", "order": 3 },
+    { "id": "c-audio-base-2",    "name": "Audio base",       "group_id": "g2", "order": 4 }
+  ],
+  "activities": [
+    {
+      "id": "a-ab1-swff", "component_id": "c-audio-base-1", "name": "SW Full feature",
+      "start": "2026-12-14", "end": "2028-02-14", "status": "ontime", "lane": 0,
+      "show_duration": true, "label_position": "above",
+      "markers": [{ "label": "SW Full feature", "date": "2027-05-10" }]
+    },
+    {
+      "id": "a-ap1-swff", "component_id": "c-audio-prem-1", "name": "SW Full feature",
+      "start": "2026-12-14", "end": "2028-02-14", "status": "ontime", "lane": 0,
+      "show_duration": true, "label_position": "above",
+      "markers": [{ "label": "SW Full feature", "date": "2027-05-10" }]
+    },
+    {
+      "id": "a-cl1-sourcing", "component_id": "c-cluster-1", "name": "Sourcing",
+      "start": "2025-11-03", "end": "2026-08-24", "status": "delayed", "lane": 0
+    },
+    {
+      "id": "a-cl1-mech", "component_id": "c-cluster-1", "name": "Mechanical + tooling",
+      "start": "2026-09-07", "end": "2027-10-04", "status": "ontime", "lane": 1,
+      "markers": [{ "label": "OT Parts", "date": "2027-05-03" }]
+    },
+    {
+      "id": "a-cl1-hw", "component_id": "c-cluster-1", "name": "HW + display Development",
+      "start": "2026-09-07", "end": "2027-10-18", "status": "ontime", "lane": 2
+    },
+    {
+      "id": "a-cl1-sw", "component_id": "c-cluster-1", "name": "SW Development",
+      "start": "2026-12-14", "end": "2028-08-07", "status": "ontime", "lane": 3,
+      "markers": [{ "label": "SW Bug free", "date": "2028-02-14" }]
+    },
+    {
+      "id": "a-cl1-dv", "component_id": "c-cluster-1", "name": "DV Testing",
+      "start": "2027-06-07", "end": "2027-09-20", "status": "concluded", "lane": 4,
+      "markers": [{ "label": "DTOP", "date": "2027-09-13" }]
+    },
+    {
+      "id": "a-cl1-pv", "component_id": "c-cluster-1", "name": "PV Testing",
+      "start": "2027-10-04", "end": "2028-01-17", "status": "concluded_delay", "lane": 4,
+      "markers": [{ "label": "PPAP", "date": "2028-01-10" }]
+    },
+    {
+      "id": "a-cl1-ppap", "component_id": "c-cluster-1", "name": "P",
+      "start": "2028-01-24", "end": "2028-02-14", "status": "attention", "lane": 4,
+      "show_duration": false
+    },
+    {
+      "id": "a-dc1-swff", "component_id": "c-dcsd-1", "name": "SW Full feature",
+      "start": "2026-12-14", "end": "2028-02-14", "status": "ontime", "lane": 0,
+      "label_position": "above"
+    },
+    {
+      "id": "a-ab2-kick", "component_id": "c-audio-base-2", "name": "Sourcing",
+      "start": "2025-11-03", "end": "2026-08-24", "status": "delayed", "lane": 0,
+      "markers": [{ "label": "Kick off", "date": "2026-08-17" }]
+    }
+  ]
+}

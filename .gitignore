@@ -1,0 +1,10 @@
+node_modules/
+tests/.engine.mjs
+dist/
+*.tlsws
+*.tlsproj
+*.pptx
+*.xlsx
+*.pdf
+.DS_Store
+Thumbs.db

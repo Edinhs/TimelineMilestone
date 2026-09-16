@@ -1,5 +1,9 @@
 # ADR-001 — Stack e formato de empacotamento
 
+> **Estado de implementação:** arquitetura-alvo do executável. O protótipo
+> funcional atual é um HTML único com núcleo JavaScript puro; consulte
+> `STATUS-ATUAL.md`. Esta ADR não é evidência de que o `.exe` já foi entregue.
+
 **Status:** proposto · **Data:** 2026-08-24 · **Decisor:** Ederson
 
 ## Contexto

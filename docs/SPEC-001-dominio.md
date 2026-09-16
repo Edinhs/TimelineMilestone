@@ -2,13 +2,24 @@
 
 **Dono:** agente `domain-modeler` · **Depende de:** `contracts/project.schema.json` (congelado)
 
+> **Estado de implementação:** o contrato e as regras abaixo estão ativos no
+> núcleo JavaScript puro delimitado por `ENGINE START/END` em
+> `app/timeline-studio.html`. As referências a Pydantic e caminhos `core/`
+> descrevem a arquitetura-alvo do executável e ainda não representam arquivos
+> entregues neste repositório.
+
 ## 1. Modelos (Pydantic v2, `core/domain/models.py`)
 
 Espelho 1:1 do JSON Schema. Nada de campo extra sem bump de `schema_version`.
-O contrato está em **1.4**. Quatro bumps aditivos até aqui, nenhum com migração:
+O contrato está em **1.14**. Os bumps são aditivos e não exigem migração:
 1.1 acrescentou `project.layout` (ADR-003), 1.2 `components[].supplier`
-(ADR-004), 1.3 `project.legend` (ADR-005) e 1.4 `project.owner` — responsável
-pelo cronograma, string de até 60 caracteres.
+(ADR-004), 1.3 `project.legend` (ADR-005), 1.4 `project.owner`, 1.5 o deck,
+1.6 os papéis/bloqueios dos elementos de slide, 1.7 `hidden` opcional em
+componentes e milestones (ADR-007), 1.8 `version_history` (ADR-008), 1.9 o
+slide OPR, 1.10 `chart.variant`, 1.11 formatação de caixas de texto, 1.12
+`project.axis_mode` com `project.layout.week_w` (ADR-012), 1.13 o vínculo
+`slide.opr_component_id` / `chart.component_id` da OPR individual (ADR-013) e
+1.14 `element.hidden` para conteúdo opcional reversível (ADR-015).
 
 `owner` não ganhou ADR próprio: é um campo de texto que segue exatamente a
 mecânica já decidida em ADR-003 (opcional, aditivo, ausência = padrão, sem
@@ -21,6 +32,14 @@ carregador só reescreve `schema_version` e os campos ausentes assumem o padrão
 caracteres, opcional. Fica no **componente**, não na atividade: o fornecedor
 entrega o componente inteiro, e pendurar na atividade multiplicaria a mesma
 informação por 5–9 linhas. Uma atividade herda o fornecedor do seu componente.
+
+`hidden=true` é estado de apresentação, não exclusão: o componente ou milestone
+continua no domínio e na validação. Ausente ou `false` significa visível.
+
+`project.axis_mode` aceita `"month"` ou `"week"`. Ausente significa `"month"`
+para preservar documentos anteriores. O modo semanal usa semana ISO-8601,
+segunda a domingo, e apresenta rótulos `WeekNN` agrupados pelo mês da
+quinta-feira da semana.
 
 ```
 Project(schema_version, project: ProjectMeta, milestones: list[Milestone],

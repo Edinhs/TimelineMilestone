@@ -1,15 +1,17 @@
-# SPEC-006 — Home: painel de consulta e auditoria
+# SPEC-006 — Visão geral: painel de consulta e auditoria
 
 **Dono:** agente `ui-builder` (apresentação) + `domain-modeler` (`auditProgram`)
 **Depende de:** SPEC-001 (domínio), ADR-004 (decisões e códigos `A2xx`)
 
 ## 1. Papel
 
-A Home responde três perguntas, nesta ordem de importância:
+A Visão geral responde cinco perguntas, nesta ordem de importância:
 
-1. **O que vem aí?** — próximo marco, prazo, o que atravessa ele.
-2. **O que já venceu e não fechou?** — marcadores vencidos com atividade aberta.
-3. **Quem é o responsável?** — fornecedor por componente e concentração de risco.
+1. **Qual é o estado geral?** — saudável, atenção, crítico ou cadastro a revisar, sempre com evidência.
+2. **O que exige ação agora?** — validação, atrasos, milestones próximos e cadastros incompletos.
+3. **O que vem aí?** — próximo marco, prazo, o que atravessa ele.
+4. **O que já venceu e não fechou?** — marcadores vencidos com atividade aberta.
+5. **Quem é o responsável?** — fornecedor por componente e concentração de risco.
 
 É a **aba padrão** do app. Somente leitura, exceto o campo de fornecedor, que é
 editável no lugar (a informação costuma chegar justamente enquanto se consulta).
@@ -53,11 +55,18 @@ auditProgram(p) -> {
 
 | # | Bloco | Conteúdo | Interação |
 |---|---|---|---|
-| 1 | **Cabeçalho do programa** | nome, responsável, rótulo de atualização, janela, hoje, contagens | — |
-| 2 | **Marcos do programa** | Marco · Tipo · Data · Semanas · Situação · Em curso · Em risco | clique → Input Milestone |
-| 3 | **Marcos individuais** | Componente · Fornecedor · Atividade · Marco · Data · Semanas · Situação | clique → a atividade; filtros: todos / vencidos / próximos 90 dias / por fornecedor |
-| 4 | **Fornecedores** | Fornecedor · Componentes · Atividades · Em atraso · Próximo marco | clique → primeiro componente do fornecedor |
-| 5 | **Achados** | lista `A2xx` com nível e mensagem | clique → item referido |
+| 1 | **Status executivo** | estado explicável, responsável, hoje, janela e última versão | — |
+| 2 | **Indicadores** | próximo milestone, progresso, atrasos, cobertura e escopo visível | clique → área relacionada |
+| 3 | **Prioridades agora** | ações derivadas de validação, atraso, prazo, cadastro e itens ocultos | clique → correção |
+| 4 | **Marcos do programa** | Marco · Tipo · Data · Semanas · Situação · Em curso · Em risco | clique → Milestones |
+| 5 | **Marcos individuais** | Componente · Fornecedor · Atividade · Marco · Data · Semanas · Situação | clique → a atividade; filtros: todos / vencidos / próximos 90 dias / por fornecedor |
+| 6 | **Fornecedores** | Fornecedor · Componentes · Atividades · Em atraso · Próximo marco | clique → primeiro componente do fornecedor |
+| 7 | **Achados** | lista `A2xx` com nível e mensagem | clique → item referido |
+
+`computeOverview(p)` é pura e combina validação, KPIs e auditoria. O estado não
+usa score numérico arbitrário: `Crítico` significa erro bloqueante; `Atenção`,
+atraso ou risco; `Revisar cadastro`, fornecedor ausente; e `Saudável`, ausência
+dessas condições.
 
 Bloco 3 é o coração: é a tabela que o legado nunca teve, e a razão de existir da
 aba. Os filtros são a interatividade que a torna auditável em vez de decorativa.
@@ -77,7 +86,8 @@ aba. Os filtros são a interatividade que a torna auditável em vez de decorativ
 2. Cada `state` tem caso positivo em fixture.
 3. `crossing` de um marco confere com contagem manual na fixture de referência.
 4. Cada código `A201`–`A205` tem caso positivo e negativo.
-5. Nenhum campo derivado aparece no `.tlsproj` salvo depois de abrir a Home.
+5. Nenhum campo derivado aparece no `.tlsproj` salvo depois de abrir a Visão geral.
+6. `computeOverview` apresenta evidência e prioridade coerentes com validação e atraso.
 
 **Resultado da bateria na fixture de referência** (`today = 2026-08-15`):
 `auditProgram` não muta o documento, é determinística, e o `crossing` do X0

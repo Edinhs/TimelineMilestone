@@ -8,3 +8,5 @@ dist/
 *.pdf
 .DS_Store
 Thumbs.db
+.playwright-cli/
+output/playwright/

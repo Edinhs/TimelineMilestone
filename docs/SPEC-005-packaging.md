@@ -2,6 +2,10 @@
 
 **Dono:** agente `packaging-engineer`
 
+> **Estado:** planejamento ainda não executado. O protótipo atual roda como
+> `app/timeline-studio.html`; nenhuma evidência de `.exe`, máquina limpa,
+> assinatura ou aprovação de antivírus foi produzida até 2026-08-26.
+
 ## 1. Pipeline de build
 
 ```
@@ -38,7 +42,7 @@ Auditar com `pyinstaller --log-level=DEBUG` + inspeção do `Analysis`.
 
 ## 5. Definição de "release pronta"
 
-- [ ] Todos os testes de SPEC-001..004 verdes
+- [x] Testes automatizados do protótipo verdes (78/78 em 2026-08-26)
 - [ ] Diff visual contra a referência revisado por humano
 - [ ] `.exe` roda em máquina limpa sem admin
 - [ ] NF-01, NF-02, NF-04 medidos e registrados no `CHANGELOG.md`

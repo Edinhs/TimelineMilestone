@@ -1,5 +1,9 @@
 # Plano de execução — waves paralelas
 
+> **Documento histórico.** As Waves 0 e 1 abaixo descrevem o plano original e
+> não são instruções do estado atual. Consulte `STATUS-ATUAL.md` para saber o
+> que foi realmente implementado e quais gates continuam pendentes.
+
 ## Por que dá para paralelizar
 
 Porque o **contrato vem antes do código**. `contracts/project.schema.json` é

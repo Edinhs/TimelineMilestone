@@ -8,6 +8,7 @@
     "test": "node tests/run.mjs",
     "test:engine": "node tests/test-engine.mjs",
     "test:ui": "node tests/test-ui.mjs",
+    "test:qa": "node tests/qa-audit.mjs",
     "lint": "node tests/check-syntax.mjs"
   },
   "devDependencies": { "jsdom": "^24.0.0" },

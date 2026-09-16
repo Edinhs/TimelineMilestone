@@ -33,10 +33,14 @@ metade.
 ## Contrato
 
 `contracts/project.schema.json` é congelado. Campo novo exige bump de
-`schema_version`, plano de migração e um ADR. Ver `docs/ADR-003`, `004`, `005`
-e `006` para o padrão já estabelecido — todos aditivos, nenhum com migração.
+`schema_version`, plano de migração e um ADR. Ver `docs/ADR-003` a `ADR-009`
+para o padrão já estabelecido — todos aditivos, nenhum com migração destrutiva.
 
 ## Documentação
 
 Feature nova atualiza a SPEC correspondente **antes** do código, não depois.
 Decisão com alternativa descartada vira ADR numerado.
+
+Antes de descrever uma capacidade como entregue, confira
+`docs/STATUS-ATUAL.md`. Arquitetura-alvo, build planejado ou teste unitário não
+substituem homologação visual, smoke do executável ou validação com arquivo real.

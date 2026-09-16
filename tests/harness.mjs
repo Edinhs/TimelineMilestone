@@ -14,12 +14,15 @@ export async function loadEngine() {
   eng = eng.slice(eng.indexOf("*/") + 2, eng.lastIndexOf("/*"));   // tira as bordas de comentário dos marcadores
   const sample = src.split("const SAMPLE =")[1].split("const BLANK")[0];
   const cover = src.slice(src.indexOf("/* ---- capa institucional travada"), src.indexOf("function applyLayout(s)"));
-  const layout = src.slice(src.indexOf("function applyLayout(s)"), src.indexOf("function generateDeck()"));
-  const gen = src.slice(src.indexOf("function generateDeck()"), src.indexOf("/* ---- palco ---- */"));
+  const genStart = src.indexOf("function generateDeck");
+  const layout = src.slice(src.indexOf("function applyLayout(s)"), genStart);
+  const genEnd = src.indexOf("function elHTML", genStart);
+  if (genStart < 0 || genEnd < 0) throw new Error("Bloco do gerador de apresentação não encontrado.");
+  const gen = src.slice(genStart, genEnd);
 
   const mod = `
     globalThis.atob = s => Buffer.from(s, "base64").toString("latin1");
-    const uid = p => p + Math.random().toString(36).slice(2, 7);
+    const uid = p => (p + crypto.randomUUID().replace(/-/g, "")).slice(0, 32);
     const document = { createElement: () => ({ getContext: () => null }) };
     let selSlide = 0, selEl = null, P;
     const markDirty = () => {};
@@ -34,7 +37,13 @@ export async function loadEngine() {
     export const api = { weeks, months, validate, computeLayout, buildDisplayList, toSVG,
       buildPDF, buildXlsx, buildPPTX, auditProgram, resolveStatuses, resolveTokens, legendTitle,
       legendHidden, parseBlock, toLegacyTimeline, toLegacyMilestones, toTSV, TL_COLS, MS_COLS,
-      midOf, computeKPIs, generateDeck, applyLayout, COVER, STAGE_W, STAGE_H, EMU_PX, brDate, iso };
+      midOf, computeKPIs, computeOverview, generateDeck, applyLayout, historySnapshot, diffProjectVersions,
+      buildDeckTemplate, validateDeckTemplate, validateProjectDeck, applyDeckTemplate,
+      buildOPR, oprLines, oprSetLines, oprMilestoneRuns, oprNextDate, oprDefaultNextSteps,
+      syncComponentOPRSlides, bindOPRComponent, oprComponentTitle,
+      statusOf, statusGeom, runParas, runsPlain, tableColumnFractions, OPR,
+      buildCompactDisplayList, chartVariant, CHART_VARIANTS, shortDate, TC,
+      COVER, STAGE_W, STAGE_H, EMU_PX, brDate, iso };
   `;
   const tmp = path.join(here, ".engine.mjs");
   fs.writeFileSync(tmp, `import { Buffer } from "node:buffer";\n` + mod);

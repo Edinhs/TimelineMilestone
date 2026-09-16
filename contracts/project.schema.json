@@ -21,9 +21,17 @@
         "1.3",
         "1.4",
         "1.5",
-        "1.6"
+        "1.6",
+        "1.7",
+        "1.8",
+        "1.9",
+        "1.10",
+        "1.11",
+        "1.12",
+        "1.13",
+        "1.14"
       ],
-      "description": "1.1 project.layout · 1.2 components[].supplier · 1.3 project.legend · 1.4 project.owner · 1.5 project.deck · 1.6 role/locked em elementos de slide. Todos opcionais e aditivos."
+      "description": "1.1 project.layout · 1.2 components[].supplier · 1.3 project.legend · 1.4 project.owner · 1.5 project.deck · 1.6 role/locked em elementos de slide · 1.7 ocultação individual · 1.8 histórico de versões por salvamento · 1.9 slide OPR: layout \"opr\", elemento \"status\" e runs[] no texto · 1.10 chart.variant (cronograma compacto) · 1.11 font/italic/underline por caixa de texto · 1.12 project.axis_mode e project.layout.week_w · 1.13 vínculo de componente em slide OPR e chart compacto · 1.14 element.hidden para conteúdo opcional preservado. Todos opcionais e aditivos."
     },
     "project": {
       "type": "object",
@@ -46,11 +54,19 @@
         "chart_start": {
           "type": "string",
           "format": "date",
-          "description": "Primeiro dia visível do eixo (será arredondado para o 1o do mês)."
+          "description": "Primeiro dia visível do eixo. No modo semanal, a régua inclui a semana ISO que intercepta esta data."
         },
         "chart_end": {
           "type": "string",
           "format": "date"
+        },
+        "axis_mode": {
+          "enum": [
+            "month",
+            "week"
+          ],
+          "default": "month",
+          "description": "month = Ano > Mês; week = Mês > Semana ISO (Week31, Week32...)."
         },
         "today": {
           "type": [
@@ -90,6 +106,13 @@
               "maximum": 72,
               "default": 24,
               "description": "Largura de um mês no eixo, em px."
+            },
+            "week_w": {
+              "type": "number",
+              "minimum": 20,
+              "maximum": 72,
+              "default": 28,
+              "description": "Largura nominal de uma semana no modelo semanal, em px."
             },
             "row_h": {
               "type": "number",
@@ -375,7 +398,8 @@
                       "content",
                       "chart",
                       "table",
-                      "blank"
+                      "blank",
+                      "opr"
                     ],
                     "default": "content"
                   },
@@ -390,6 +414,11 @@
                   "bg": {
                     "type": "string",
                     "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "opr_component_id": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "description": "Componente representado individualmente pelo slide OPR. Ausente = slide OPR livre ou legado."
                   },
                   "elements": {
                     "type": "array",
@@ -417,7 +446,8 @@
                             "image",
                             "shape",
                             "table",
-                            "chart"
+                            "chart",
+                            "status"
                           ]
                         },
                         "x": {
@@ -449,6 +479,17 @@
                         },
                         "bold": {
                           "type": "boolean"
+                        },
+                        "italic": {
+                          "type": "boolean"
+                        },
+                        "underline": {
+                          "type": "boolean"
+                        },
+                        "font": {
+                          "type": "string",
+                          "maxLength": 40,
+                          "pattern": "^[A-Za-z0-9 ._-]{1,40}$"
                         },
                         "align": {
                           "enum": [
@@ -497,6 +538,73 @@
                           "type": "boolean",
                           "description": "Primeira linha da tabela é cabeçalho."
                         },
+                        "runs": {
+                          "type": "array",
+                          "maxItems": 60,
+                          "description": "Texto com estilo por trecho (elemento \"text\"). Espelha a:r do OOXML. Quando presente e não vazio, substitui \"text\" na renderização e na exportação; \\n dentro de um trecho abre parágrafo, mesma regra de \"text\".",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "text"
+                            ],
+                            "properties": {
+                              "text": {
+                                "type": "string",
+                                "maxLength": 1000
+                              },
+                              "size": {
+                                "type": "number",
+                                "minimum": 6,
+                                "maximum": 96
+                              },
+                              "bold": {
+                                "type": "boolean"
+                              },
+                              "italic": {
+                                "type": "boolean"
+                              },
+                              "underline": {
+                                "type": "boolean"
+                              },
+                              "color": {
+                                "type": "string",
+                                "pattern": "^#[0-9A-Fa-f]{6}$"
+                              }
+                            }
+                          }
+                        },
+                        "variant": {
+                          "enum": [
+                            "full",
+                            "compact"
+                          ],
+                          "default": "full",
+                          "description": "Desenho do elemento \"chart\". \"full\" é o cronograma completo; \"compact\" é a faixa reduzida do slide OPR — régua de anos e meses, bandeirinhas de marco e fases em pistas, sem painel de componentes nem legenda. Ausente ou inválido = \"full\"."
+                        },
+                        "component_id": {
+                          "type": "string",
+                          "maxLength": 32,
+                          "description": "Filtro opcional do chart compacto. Quando presente, desenha somente atividades e marcadores do componente; marcos do programa permanecem."
+                        },
+                        "label": {
+                          "type": "string",
+                          "maxLength": 12,
+                          "description": "Rótulo do elemento \"status\" (ex.: RISK, PPID). Vazio desenha só o semáforo."
+                        },
+                        "level": {
+                          "type": "integer",
+                          "minimum": -1,
+                          "maximum": 9,
+                          "description": "Casa acesa do elemento \"status\", da esquerda para a direita: 0 verde, 1 amarelo, 2 vermelho. -1 não acende nenhuma."
+                        },
+                        "slots": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 5,
+                          "default": 3,
+                          "description": "Número de casas do semáforo do elemento \"status\"."
+                        },
                         "role": {
                           "type": "string",
                           "maxLength": 24,
@@ -506,11 +614,53 @@
                           "type": "boolean",
                           "default": false,
                           "description": "Elemento do template: não pode ser movido, redimensionado nem removido. O texto continua editável."
+                        },
+                        "hidden": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Oculta o elemento no palco e no PPTX sem apagar seu conteúdo. Ausente ou false = visível."
                         }
                       }
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "version_history": {
+      "type": "array",
+      "description": "Histórico aditivo das diferenças registradas em salvamentos bem-sucedidos do projeto.",
+      "items": {
+        "type": "object",
+        "required": ["id", "version", "saved_at", "changes"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,32}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "saved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "action", "before", "after"],
+              "additionalProperties": false,
+              "properties": {
+                "path": { "type": "string", "maxLength": 240 },
+                "action": { "enum": ["added", "changed", "removed"] },
+                "before": { "type": ["string", "null"], "maxLength": 160 },
+                "after": { "type": ["string", "null"], "maxLength": 160 }
               }
             }
           }
@@ -558,6 +708,11 @@
           "show_marker": {
             "type": "boolean",
             "default": false
+          },
+          "hidden": {
+            "type": "boolean",
+            "default": false,
+            "description": "Quando true, o milestone permanece salvo e editável, mas não é desenhado no cronograma."
           },
           "color_override": {
             "type": [
@@ -634,6 +789,11 @@
           "collapsed": {
             "type": "boolean",
             "default": false
+          },
+          "hidden": {
+            "type": "boolean",
+            "default": false,
+            "description": "Quando true, o componente e suas atividades permanecem salvos e editáveis, mas não são desenhados no cronograma."
           },
           "supplier": {
             "type": [

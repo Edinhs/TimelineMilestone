@@ -2,17 +2,15 @@
 
 ## 0. Direção visual
 
-**"Mesa de trabalho".** O entregável é um documento impresso; então o desenho é
-a folha branca e a interface é a mesa em volta dela — sóbria, sem brilho. Navy
-institucional é a **única** cor de ação: botão primário, marca, aba ativa, foco,
-seleção. Vermelho, âmbar e verde ficam reservados a estado (erro, aviso,
-concluído) e nunca decoram.
+**Dashboard corporativo.** O entregável continua sendo a folha branca do
+cronograma, mas a aplicação organiza o trabalho como um painel executivo:
+navegação superior compacta, cabeçalho claro, contexto do programa, KPIs e
+superfícies brancas com elevação discreta. Azul institucional identifica ação,
+foco e seleção. Vermelho, âmbar e verde ficam reservados a estado.
 
-O cabeçalho **acompanha o tema**, não é uma faixa escura fixa. A hierarquia do
-topo é sustentada por elevação e não por inversão de cor: borda inferior,
-`--mh-shadow` e a segunda faixa um tom mais fria que a primeira. Uma barra
-escura cravada sobre uma interface clara lê como widget de outro aplicativo — e
-o usuário pediu o tema aplicado ao menu, com razão.
+No desktop, o menu superior reúne identidade, navegação, seleção de projeto e
+ações em uma única faixa. Em telas menores, as abas mantêm rolagem horizontal
+dentro do mesmo cabeçalho.
 
 ### Dois temas, um sistema
 
@@ -37,7 +35,7 @@ escuro não podem ser: o azul que aguenta texto branco em cima (`--navy #3A54C4`
 texto (`--accent #8FA6F2`) é claro demais para carregar texto branco. Botão
 primário usa `--navy`; borda de foco, aba ativa e hover usam `--accent`.
 
-**Modos:** automático (padrão), claro e escuro, alternados pelo botão de ícone
+**Modos:** claro (padrão), escuro e automático, alternados pelo botão de ícone
 no cabeçalho ou por `Ctrl+D`. O ícone mostra o **modo escolhido**, não o
 resultado: disco meio preenchido em automático (quem manda é o sistema), sol em
 claro, lua em escuro. Mostrar o resultado esconderia justamente a informação que
@@ -49,7 +47,7 @@ qualquer tema e não custam requisição nem arquivo. Botão de ajuda idem. O au
 tempo real via `matchMedia().addEventListener("change")` — se o Windows virar
 para o tema noturno agendado, a aplicação acompanha sem recarregar. **Não há
 persistência entre sessões**: guardar exigiria storage de navegador, proibido
-pela regra 6 do `CLAUDE.md`. O padrão automático torna isso quase invisível.
+pela regra 6 do `CLAUDE.md`.
 
 `color-scheme: light|dark` é declarado em cada tema. Sem isso, os controles
 nativos — seletor de data, spinners numéricos, barras de rolagem — continuariam
@@ -98,22 +96,28 @@ nativo entrega navegação por teclado e semântica de leitor de tela sem códig
 O evento `toggle` não sobe na árvore, então o registro do estado escuta em fase
 de captura.
 
-## 1b. As duas telas de input
-
-**Dono:** agente `ui-builder` · **Depende de:** contrato JSON + display list (SPEC-002)
+Conteúdo largo nunca é cortado pelo acordeão. O painel mantém apenas rolagem
+vertical, enquanto cada `.sec-b` assume a rolagem horizontal do próprio
+conteúdo. Tabelas preservam a largura necessária às colunas e campos flexíveis
+podem encolher até a largura disponível. Assim, em painéis estreitos, nenhuma
+coluna ou ação desaparece fora da janela e a rolagem fica junto da seção a que
+pertence.
 
 ## 1. Layout da aplicação
 
-Assinatura da tela: a **faixa de indicadores** entre o cabeçalho e o desenho.
+**Dono:** `ui-builder` · **Depende de:** contrato JSON + display list (SPEC-002)
+
+Assinatura da Visão geral: a **faixa de indicadores** entre o cabeçalho e o desenho.
+Ela é ocultada nas demais seções para manter o contexto de edição mais compacto.
 Ela transforma o editor em briefing e é derivada, nunca armazenada
 (`computeKPIs`):
 
 | indicador | conteúdo | ao clicar |
 |---|---|---|
-| Próximo marco | rótulo, data e semanas até lá, a partir de `today` | vai para Input Milestone |
+| Próximo marco | rótulo, data e semanas até lá, a partir de `today` | vai para Milestones |
 | Em atraso | atividades `delayed` + `concluded_delay` | abre a primeira delas |
 | Concluídas | `n/total` e % do escopo | — |
-| Componentes | contagem, com total de atividades | vai para Input Timeline |
+| Componentes | contagem, com total de atividades | vai para Timeline |
 | Janela | intervalo de anos e nº de meses | vai para Projeto |
 
 "Próximo marco" é o primeiro item porque é a pergunta que o PL faz todo dia.
@@ -121,21 +125,68 @@ Ela transforma o editor em briefing e é derivada, nunca armazenada
 ```
 ┌───────────────────────────────────────────────────────────┐
 │ toolbar: [Novo] [Abrir] [Salvar] │ [PNG] [PDF] [SVG] [XLSX]│
+├───────────────────────────────────────────────────────────┤
+│ Visão geral · Apresentação · Projeto · Milestones · Timeline│
 ├───────────────┬───────────────────────────────────────────┤
-│ Tabs:         │                                           │
-│  ▸ Home       │            PREVIEW  (<svg>)               │
-│  ▸ Milestone  │            zoom / fit / pan               │
-│  ▸ Timeline   │
-│  ▸ Projeto    │                                           │
-│  (grid ~55%)  │                                           │
+│ editor        │            PREVIEW  (<svg>)               │
+│ da seção      │            zoom / fit / pan               │
+│ ativa         │                                           │
 ├───────────────┴───────────────────────────────────────────┤
 │ painel de validação: 0 erros · 2 avisos   [clicável]      │
 └───────────────────────────────────────────────────────────┘
 ```
 
-Split vertical redimensionável. O preview é o mesmo desenho que sai no export.
+A navegação principal e as ações do workspace ocupam um único menu superior de
+58 px no desktop. As abas são compactas e têm rolagem horizontal própria quando
+o espaço diminui, preservando o acesso a todas as seções sem criar uma segunda
+barra. Editor e Preview permanecem lado a lado enquanto houver largura; o
+Preview é o mesmo desenho que sai no export.
 
-## 2. Tela "Input Milestone"
+Um divisor vertical entre editor e Preview permite personalizar a largura do
+editor durante a sessão. O limite superior é **50% da área útil depois de
+descontar o divisor**, preservando metade do workspace
+restante para a Preview; o mínimo é 280 px enquanto houver espaço.
+O divisor aceita arraste, setas do teclado (com `Shift` para passos maiores),
+`Home`/`End` para os limites e duplo clique para restaurar o tamanho responsivo.
+Em telas de até 760 px, onde as áreas ficam empilhadas, o divisor é ocultado.
+
+### Modelos da janela do eixo
+
+Na aba **Projeto**, a seção **Janela do eixo** contém o seletor **Modelo do
+eixo** com exatamente duas opções:
+
+- **Ano > Mês**: comportamento histórico e padrão para projetos antigos.
+- **Mês > Semana ISO (Week31)**: agrupa semanas pelo mês/ano e mostra `WeekNN`.
+
+A troca atualiza a Preview sem remontar o formulário, preserva o foco e é salva
+em `project.axis_mode`. O controle de dimensões oferece separadamente a largura
+do mês e a largura da semana.
+
+### Tela cheia da Preview
+
+A barra da Preview oferece a ação **Tela cheia**. O mesmo controle encerra o
+modo, e a tecla `Esc` permanece disponível pelo comportamento nativo do
+navegador. A área ampliada inclui zoom, desenho e painel de validação.
+
+### Edição direta no palco
+
+Elementos de texto dos slides expõem um campo editável no próprio palco. Clique
+posiciona o cursor; um deslocamento superior a 4 px troca o gesto para arraste.
+Enquanto o cursor está no texto, setas, `Backspace` e `Delete` editam o conteúdo
+e não movem nem removem o elemento. `Escape` encerra a edição; `Enter` confirma
+cabeçalhos de uma linha e continua criando linhas nos corpos do OPR.
+
+## 1d. Histórico dentro da Visão geral
+
+A Visão geral possui as subabas **Resumo** e **Histórico de versões**. O
+histórico lista as versões mais recentes primeiro e abre a versão atual por
+padrão. Cada versão apresenta data/hora, campo, ação e valores anterior/posterior.
+Quando ainda não houve salvamento com mudanças, a tela explica quando a primeira
+versão será criada.
+
+## 2. Aba Milestones
+
+`Input Milestone` permanece somente como nome da aba compatível no XLSX legado.
 
 Grid editável, uma linha por marco:
 
@@ -152,18 +203,26 @@ Grid editável, uma linha por marco:
 Ações: adicionar, duplicar, remover, reordenar por data. Botão "Preencher
 padrão PHES" insere PM, CM, SFM, SHRM, SOPM, X0–X3 sem datas.
 
-## 2b. Aba "Home"
+Cada milestone possui uma ação de visibilidade. Ocultar remove apenas sua
+representação do cronograma; a linha, seus dados e sua possibilidade de edição
+continuam presentes (ADR-007).
+
+## 2b. Aba Visão geral
 
 Aba padrão, especificada em `docs/SPEC-006-home.md`. Painel de consulta e
 auditoria, derivado do documento e somente leitura — exceto o campo de
 fornecedor, editável no lugar.
 
-## 3. Tela "Input Timeline"
+## 3. Aba Timeline
+
+`Input Timeline` permanece somente como nome da aba compatível no XLSX legado.
 
 Duas seções: **Componentes** (mestre) e **Atividades** (detalhe do componente selecionado).
 
-Componentes: `nome`, `grupo`, `ordem`, `fornecedor`, `[+ atividade]`, `[remover]`.
-O fornecedor também é editável direto na Home — a informação costuma chegar
+Componentes: `nome`, `grupo`, `ordem`, `fornecedor`, `[+ atividade]`,
+`[ocultar/exibir]`, `[remover]`. Ocultar é reversível, preserva atividades e
+afeta somente os exports visuais (ADR-007).
+O fornecedor também é editável direto na Visão geral — a informação costuma chegar
 enquanto se consulta, e obrigar a trocar de aba para registrá-la faz com que
 não seja registrada.
 
@@ -200,7 +259,7 @@ Colar do Excel (Ctrl+V de um bloco tabular) deve preencher múltiplas linhas —
 ## 2c. Identificação (aba Projeto)
 
 Ao lado de *Rótulo de atualização*, o campo **Responsável** (`project.owner`).
-Os dois alimentam o bloco de identificação do desenho (SPEC-002 §6a) e a Home.
+Os dois alimentam o bloco de identificação do desenho (SPEC-002 §6a) e a Visão geral.
 
 ## 3b. Legenda editável (aba Projeto)
 
@@ -233,7 +292,7 @@ O preview não é uma imagem morta:
 - **Hover numa barra** → tooltip com atividade, datas, duração, componente,
   status e marcadores.
 - **Clique numa barra** → abre a atividade correspondente: troca para a aba
-  Input Timeline, seleciona o componente, rola até a linha, destaca e foca o
+  Timeline, seleciona o componente, rola até a linha, destaca e foca o
   campo. É o caminho mais curto entre "vi algo errado" e "corrigi".
 - **Clique num item da validação** → mesma navegação, a partir do `Issue.path`.
 
@@ -251,7 +310,7 @@ excluir projeto) — ali a interrupção é o ponto.
 ## 4d. Verificação em DOM real
 
 Checagem de sintaxe não pega erro de execução: uma variável não declarada só
-estoura quando a função roda. O arquivo `app/smoke-check.js` carrega o app em
+estoura quando a função roda. O arquivo `tests/test-ui.mjs` carrega o app em
 jsdom (com `ResizeObserver` e métricas de layout stubadas), captura
 `window.onerror` e exerce o caminho crítico — boot, cada botão de zoom, troca de
 aba, montagem do palco, travas da capa e arraste. Qualquer exceção aparece como
@@ -282,18 +341,23 @@ validação, não o painel). Quando algo no painel precisa refletir a mudança, 
 ou por `select`: trocar de aba, de slide, de layout, adicionar ou remover item.
 Ali não há campo de texto em edição para proteger.
 
-## 5. Regras de estado (frontend)
+## 5. Regras de estado (implementação atual)
 
-- Estado único imutável = documento do projeto (`Project`). Toda edição é
-  uma ação pura `(state, action) -> state`.
-- Após cada mudança: `debounce(120ms)` → chama o core → recebe
-  `{display_list, issues}` → redesenha. Nenhum cálculo de layout no JS.
-- Undo/redo via pilha de estados (v1.0: 50 níveis, só em memória).
-- **Proibido:** `localStorage`/`sessionStorage`. Persistência só via arquivo
-  através da ponte Python.
+- O workspace mantém todos os projetos vivos em memória; `P` aponta para o
+  documento ativo e as edições atualizam esse objeto.
+- `touch()` marca alterações e redesenha Preview/validação sem remontar os
+  campos; `render()` completo fica reservado a mudanças estruturais.
+- O histórico compara o estado salvo conhecido com o estado gravado e só cria
+  versão depois de uma escrita bem-sucedida (ADR-008).
+- Undo/redo ainda não está implementado e permanece no roadmap v1.1.
+- **Proibido:** `localStorage`/`sessionStorage`. Persistência ocorre somente em
+  arquivo escolhido pelo usuário ou download de fallback.
 
 ## 6. Acessibilidade e ergonomia
 
 - Navegação por teclado completa nas grids (Tab, Enter, setas, Ctrl+D duplicar).
 - Chips de status não dependem só de cor: exibem o rótulo textual.
-- Zoom do preview: `Ctrl + roda`, `Fit` e presets 50/75/100/150%.
+- Zoom do preview: roda do mouse, botões `−`/`+`, `Tudo`, `Largura`, `100%` e
+  atalhos `Ctrl++`, `Ctrl+-`, `Ctrl+0`.
+- O divisor editor/Preview usa `role="separator"`, recebe foco e aceita setas,
+  `Shift`, `Home` e `End`; o valor acessível é informado como percentual.

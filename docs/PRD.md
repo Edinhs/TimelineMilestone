@@ -1,7 +1,7 @@
 # PRD — Timeline Studio
 
-**Versão:** 0.1 (draft) · **Autor:** Ederson · **Data:** 2026-08-24
-**Status:** aguardando aprovação antes da Wave 1 (código)
+**Versão:** 0.4 · **Autor:** Ederson · **Atualizado em:** 2026-08-26
+**Status:** protótipo funcional em homologação; empacotamento nativo pendente
 
 ---
 
@@ -31,12 +31,12 @@ e marcos PM, CM, SFM, SHRM, X0–X3, SOPM.
 ## 2. Visão
 
 Um **aplicativo executável único (.exe, sem instalação, offline)** que
-reproduz — e supera — a saída visual do Schedule Generator, com duas telas
-de entrada (Milestones e Timeline), validação em tempo real, preview do
-Gantt ao vivo, e exportação para PNG/PDF/SVG/XLSX.
+reproduz — e supera — a saída visual do Schedule Generator, com Visão geral,
+Projeto, Milestones, Timeline e Apresentação, validação em tempo real, Preview
+do Gantt ao vivo e exportação para PNG/PDF/SVG/XLSX/PPTX.
 
-> *Nem VBA, nem macro, nem dependência de Excel. Um arquivo `.json` por
-> projeto é a fonte da verdade; o desenho é derivado, nunca editado à mão.*
+> *Nem VBA, nem macro, nem dependência de Excel. O workspace `.tlsws` contém os
+> projetos que seguem o contrato JSON; o desenho é derivado, nunca editado à mão.*
 
 ## 3. Público-alvo e personas
 
@@ -50,10 +50,13 @@ Gantt ao vivo, e exportação para PNG/PDF/SVG/XLSX.
 
 ### 4.1 Dentro do escopo (v1.0)
 
+A tabela define o alvo da v1.0; não significa que todos os itens já estejam
+entregues. O estado comprovado de cada frente está em `STATUS-ATUAL.md`.
+
 | ID | Requisito |
 |----|-----------|
-| F-01 | **Input Milestone**: CRUD de marcos globais (id, label, data, estilo gate/xgate, mostrar linha, mostrar marcador) |
-| F-02 | **Input Timeline**: CRUD de componentes e atividades (nome, início, fim, status, lane, marcadores ancorados) |
+| F-01 | **Milestones**: CRUD de marcos globais (id, label, data, estilo gate/xgate, mostrar linha, mostrar marcador) |
+| F-02 | **Timeline**: CRUD de componentes e atividades (nome, início, fim, status, lane, marcadores ancorados) |
 | F-03 | Cálculo automático de duração em semanas (`W`) e meses (`M`), equivalente ao UDF `calcula_intervalo` |
 | F-04 | Render do Gantt em SVG: cabeçalho ano/mês, grid mensal, linha "Today", linhas verticais de marco, barras coloridas por status, marcadores triangulares rotulados, legenda "Components", logo e "Last update on" |
 | F-05 | Preview ao vivo (mudança na tabela → redesenho < 150 ms) |
@@ -67,11 +70,19 @@ Gantt ao vivo, e exportação para PNG/PDF/SVG/XLSX.
 | F-13 | Salvar workspace `.tlsws` (N projetos) e projeto isolado `.tlsproj`; indicador de alterações pendentes e aviso ao fechar |
 | F-14 | **Dimensões personalizadas por projeto**: largura do mês, altura de linha e barra, painel, faixa de marcos e escala do texto, com predefinições Compacto/Padrão/Amplo |
 | F-15 | Tamanho de página do PDF personalizado em mm, além de sob medida / A3 / A4 |
-| F-16 | **Aba Home**: painel de consulta e auditoria com marcos do programa, marcos individuais por componente, resumo por fornecedor e achados `A2xx`, tudo derivado |
-| F-20 | **Aba Apresentação**: editor de slides com texto, imagem, formas e tabelas posicionáveis, layouts e tema pré-configurados, geração automática a partir do projeto e exportação `.pptx` |
-| F-19 | **Responsável pelo cronograma** no cabeçalho do desenho, ao lado do rótulo de atualização, e na Home |
+| F-16 | **Visão geral**: painel de consulta e auditoria com marcos do programa, marcos individuais por componente, resumo por fornecedor e achados `A2xx`, tudo derivado |
+| F-17 | **Fornecedor por componente**, editável na Visão geral e na aba Timeline, exportado no Excel e no CSV |
 | F-18 | **Legenda editável**: nome e cores de cada status por projeto, título da caixa, ocultar linhas, com padrão sempre restaurável |
-| F-17 | **Fornecedor por componente**, editável na Home e na aba Timeline, exportado no Excel e no CSV |
+| F-19 | **Responsável pelo cronograma** no cabeçalho do desenho, ao lado do rótulo de atualização, e na Visão geral |
+| F-20 | **Aba Apresentação**: editor de slides com texto, imagem, formas e tabelas posicionáveis, capa corporativa personalizável, geração automática de capa + cronograma e exportação `.pptx` |
+| F-21 | **Visibilidade individual reversível** de componentes e milestones, sem excluir dados; exports visuais respeitam a seleção |
+| F-22 | **Histórico de versões por salvamento**: diferenças por campo, criado somente após gravação bem-sucedida |
+| F-23 | **Preview em tela cheia**, incluindo zoom, desenho e validação, com saída pelo mesmo botão ou `Esc` |
+| F-24 | **Workspace responsivo**: menu superior único e compacto, seções contidas e divisor ajustável; editor limitado a 50% da área útil |
+| F-25 | **Resumo executivo acionável**: estado explicável, prioridades, cobertura de fornecedores, escopo visível e atalhos |
+| F-26 | **Aba OPR**: gera e sincroniza um one-pager "Open Points and Risks" individual por componente, como slides do mesmo deck — faixa compacta filtrada, grade de cards da referência, semáforo editável, texto com estilo por trecho e linha de marcos |
+| F-27 | **Cronograma compacto**: variante do elemento `chart` com régua de anos e meses, bandeirinhas de marco e fases em pistas, sem painel nem legenda |
+| F-28 | **Formatação contextual de texto**: ao selecionar uma caixa no slide, abrir pop-up com fonte, tamanho, cor, negrito, itálico, sublinhado, alinhamento e restauração |
 
 ### 4.2 Fora do escopo (v1.0)
 
@@ -95,26 +106,25 @@ Gantt ao vivo, e exportação para PNG/PDF/SVG/XLSX.
 | NF-06 | Confidencialidade | dados do programa só em disco local escolhido pelo usuário; sem telemetria |
 | NF-07 | Fidelidade visual | export PNG comparável lado a lado com a referência (revisão humana) |
 
-## 6. Arquitetura de alto nível
+## 6. Arquitetura de alto nível — implementação atual
 
 ```
-┌─────────────────────── timeline-studio.exe ───────────────────────┐
-│  pywebview (janela nativa, WebView2)                              │
-│    └── frontend React+Vite (buildado, servido de assets locais)   │
-│          ├── Tela 1: Input Milestone (grid)                       │
-│          ├── Tela 2: Input Timeline (grid)                        │
-│          └── Preview: <svg> renderizado no cliente                │
-│  ↕ ponte JSON (pywebview api / FastAPI local em 127.0.0.1)        │
-│  core Python                                                      │
-│    ├── domain/      (modelos Pydantic = espelho do JSON Schema)   │
-│    ├── calc/        (durações, escala de datas, layout de lanes)  │
-│    ├── render/      (gerador SVG canônico — mesma engine do UI)   │
-│    ├── io/          (tlsproj, xlsx export, xlsm import)           │
-│    └── export/      (svg→png via cairosvg, →pdf)                  │
-└───────────────────────────────────────────────────────────────────┘
+┌────────────── app/timeline-studio.html ──────────────┐
+│ interface HTML/CSS/JS                                │
+│  ├── Visão geral · Apresentação · OPR · Projeto      │
+│  ├── Milestones · Timeline                           │
+│  └── Preview SVG + validação                         │
+│ núcleo JavaScript puro                               │
+│  ├── domínio e cálculos                              │
+│  ├── auditoria e validação                           │
+│  ├── display list e render                           │
+│  └── persistência e exportadores                     │
+└──────────────────────────────────────────────────────┘
 ```
 
-Decisão de stack registrada em `docs/ADR-001-stack.md`.
+O `.exe` com pywebview/Python permanece arquitetura-alvo, não entrega atual.
+A decisão original está em `docs/ADR-001-stack.md` e os gates de build em
+`docs/SPEC-005-packaging.md`.
 
 ## 7. Métricas de sucesso
 
@@ -123,7 +133,7 @@ Decisão de stack registrada em `docs/ADR-001-stack.md`.
 | Tempo para montar um cronograma novo do zero | ~2 h | ≤ 30 min |
 | Tempo para atualizar status semanal | ~20 min | ≤ 3 min |
 | Erros de dado detectados só no review | frequentes (ex.: P4) | 0 (bloqueio na entrada) |
-| Tempo para responder "o que venceu e não fechou?" | leitura manual do gráfico | consulta direta na Home |
+| Tempo para responder "o que venceu e não fechou?" | leitura manual do gráfico | consulta direta na Visão geral |
 | Export pronto para apresentação | print de tela | 1 clique, 300 dpi |
 | Montar o pack de milestone review | manual no PowerPoint | deck gerado e editável no próprio app |
 
@@ -137,17 +147,22 @@ Decisão de stack registrada em `docs/ADR-001-stack.md`.
 | R4 — Confidencialidade de dados de programa | Baixa | Muito alto | NF-03/NF-06; usar apenas fixtures anônimas em dev |
 | R5 — Escopo crescer para portfólio antes da v1 fechar | Alta | Médio | §4.2 explícito; portfólio só na v2 |
 
-## 9. Roadmap
+## 9. Roadmap e estado
 
-- **v1.0** — escopo §4.1. Single-project, single-user, offline.
+- **Protótipo v0.3 atual** — aplicação HTML offline, multiprojeto, editor,
+  Preview, auditoria, histórico e exportadores; suíte automatizada verde.
+- **Próximo gate** — homologação visual, paridade do cálculo legado e validação
+  com arquivos anonimizados.
+- **v1.0** — empacotamento Windows, smoke em máquina limpa e aceite operacional.
 - **v1.1** — drag-and-drop nas barras, baseline vs atual, undo/redo.
 - **v2.0** — portfólio analítico sobre o `.tlsws`: visão consolidada de todos os
   projetos, comparação de marcos e alertas de prazo (substitui de vez a aba
   `Projetos` replicada).
 
-## 10. Perguntas abertas (decidir antes da Wave 2)
+## 10. Decisões pendentes antes da release nativa
 
-1. `.exe` puro offline **ou** app web interno hospedado? (PRD assume `.exe`.)
+1. Confirmar `.exe` offline como canal final ou manter o HTML offline como
+   distribuição transitória. O PRD continua assumindo `.exe` para a v1.0.
 2. O XLSX exportado precisa ser abrível pela macro legada, ou é só leitura humana?
 3. A janela do eixo (`chart_start`/`chart_end`) é sempre manual ou deve inferir do min/max das datas?
 4. Semana = semana calendário ISO ou semana Stellantis (definição do `calcula_intervalo`)? — bloqueante para F-03.

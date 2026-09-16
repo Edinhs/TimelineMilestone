@@ -2,6 +2,12 @@
 
 **Dono:** agente `io-integrator`
 
+> **Estado de implementação:** o app HTML salva e abre por File System Access
+> API quando disponível, com download como fallback. Escrita atômica, backups
+> rotativos, importador `.xlsm` via `openpyxl` e a ponte Python pertencem à
+> arquitetura-alvo do executável e continuam pendentes; não devem ser tratados
+> como capacidades entregues pelo protótipo atual.
+
 ## 1. Formatos nativos
 
 ### `.tlsproj` — um projeto

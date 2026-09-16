@@ -1,4 +1,7 @@
-# ADR-004 — Painel Home de auditoria e o campo `supplier`
+# ADR-004 — Visão geral de auditoria e o campo `supplier`
+
+> A área foi inicialmente chamada **Home**. O nome atual da interface é
+> **Visão geral**; o nome do arquivo foi mantido para preservar referências.
 
 **Status:** aceito · **Data:** 2026-08-25 · **Decisor:** Ederson
 
@@ -15,12 +18,12 @@ existia em lugar nenhum — nem no `.xlsm` legado, onde vivia no e-mail de algu�
 
 ## Decisões
 
-### 1. Home é 100% derivada. Nada de auditoria é armazenado.
+### 1. A Visão geral é 100% derivada. Nada de auditoria é armazenado.
 
 `auditProgram(p)` é uma função pura sobre o documento: nenhuma contagem, prazo,
 situação ou achado é gravado no `.tlsproj`. Motivo: dado derivado que persiste
 é dado que desatualiza em silêncio — exatamente o defeito da aba `Projetos`
-replicada do arquivo legado (P3 do PRD). Se a Home e o gráfico discordarem, é
+replicada do arquivo legado (P3 do PRD). Se a Visão geral e o gráfico discordarem, é
 bug de código, não de arquivo.
 
 ### 2. Achados de auditoria (`A2xx`) são uma família separada de `E0xx`/`W1xx`.
@@ -32,7 +35,7 @@ bug de código, não de arquivo.
 | `A2xx` | o **programa** está saudável? | nunca bloqueia nada |
 
 Misturar as três geraria um painel de validação que grita sobre gestão de
-programa quando o usuário só quer exportar um PNG. `A2xx` vive na Home, e só lá.
+programa quando o usuário só quer exportar um PNG. `A2xx` vive na Visão geral, e só lá.
 
 Códigos definidos:
 
@@ -59,12 +62,12 @@ gera `A201`. Sem migração.
 
 O Gantt reproduz o arquivo de referência, onde não existe coluna de fornecedor.
 Acrescentar texto ali quebraria a fidelidade visual que a SPEC-002 protege. O
-fornecedor aparece na Home, nas tabelas exportadas e na aba `Auditoria` do
+fornecedor aparece na Visão geral, nas tabelas exportadas e na aba `Auditoria` do
 Excel — todos contextos de consulta, não de apresentação.
 
 ## Consequências
 
-- A Home vira a **aba padrão**: quem abre o app na maioria das vezes quer
+- A Visão geral vira a **aba padrão**: quem abre o app na maioria das vezes quer
   consultar, não editar. Editar continua a um clique.
 - `auditProgram` é pura e testável sem UI, como o resto do núcleo.
 - Export XLSX ganha uma quarta aba, `Auditoria`, e a coluna `Supplier` é

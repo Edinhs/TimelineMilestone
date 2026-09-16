@@ -30,11 +30,12 @@ divergirem, é bug da engine, não da UI.
 ## 2. Geometria
 
 Os valores abaixo são os **padrões**. Desde o schema 1.1, `project.layout`
-sobrescreve seis deles por projeto — ver `docs/ADR-003-dimensoes.md`:
+sobrescreve dimensões por projeto — ver `docs/ADR-003-dimensoes.md` e ADR-012:
 
 | campo em `layout` | token | padrão | faixa |
 |---|---|---|---|
 | `month_w` | `MONTH_W` | 24 | 10–72 |
+| `week_w` | `WEEK_W` | 28 | 20–72 |
 | `row_h` | `ROW_H` | 16 | 10–40 |
 | `bar_h` | `BAR_H` | 11 | 5–30 |
 | `panel_w` | `PANEL_W` | 150 | 80–320 |
@@ -57,6 +58,7 @@ Nenhum outro módulo lê `T` diretamente: o desenho usa o objeto resolvido.
 | `LEFT_PANEL_W` | 180 px | coluna de nomes de componente |
 | `GROUP_COL_W` | 24 px | coluna do número do grupo |
 | `MONTH_W` | 24 px | largura de 1 mês no eixo |
+| `WEEK_W` | 28 px | largura nominal de 1 semana no eixo semanal |
 | `TITLE_H` | 24 px | faixa navy do título, apenas sobre a área do gráfico |
 | `HEADER_H` | 44 px | banda ano (22) + banda mês (22) |
 | `MILESTONE_BAND_H` | 110 px | faixa entre header e primeira linha (rótulos PM/CM/X0… e legenda) |
@@ -70,10 +72,22 @@ Nenhum outro módulo lê `T` diretamente: o desenho usa o objeto resolvido.
 
 ```
 x(d) = ORIGIN_X + (d - chart_start).days / (chart_end - chart_start).days * TOTAL_W
-TOTAL_W = n_months(chart_start, chart_end) * MONTH_W
+TOTAL_W(month) = n_months(chart_start, chart_end) * MONTH_W
+TOTAL_W(week) = n_iso_weeks_intersecting(chart_start, chart_end) * WEEK_W
 ```
 
-Gridlines verticais no 1º dia de cada mês; separador mais forte no 1º de janeiro.
+`project.axis_mode` seleciona dois modelos:
+
+1. `month` (padrão): primeira faixa com o ano, segunda com os meses; gridlines
+   no primeiro dia de cada mês e separador mais forte em janeiro.
+2. `week`: primeira faixa com `Mês/Ano`, segunda com `WeekNN`; gridlines em
+   cada segunda-feira e separador mais forte quando muda o mês de referência.
+
+Semanas seguem ISO-8601 (segunda a domingo). O número e o ano ISO são definidos
+pela quinta-feira; a mesma quinta-feira decide em qual mês a semana será
+agrupada. Semanas parciais nas bordas continuam representadas, mas o rótulo pode
+ser omitido quando não houver largura física suficiente para desenhá-lo sem
+invadir a célula vizinha. Campo ausente ou inválido cai em `month`.
 
 ## 3. Paleta (tokens em `core/render/theme.py`)
 
@@ -131,13 +145,19 @@ português devolve exatamente as chaves originais.
 9. Painel esquerdo (nomes de componentes em caixa navy, coluna de grupo)
 10. Chrome: título, "Last update on:", logo, legenda "Components"
 
+Componentes com `hidden=true` e todas as suas atividades ficam fora do layout
+visual. Milestones com `hidden=true` não produzem linha, rótulo ou marcador.
+Essa filtragem acontece somente na construção da display list; os dados-fonte
+não são alterados.
+
 ## 5. Regras de rotulagem
 
 - `label_position="inside"`: texto centralizado na barra, formato `Nome  NNW`.
   Se `text_width > bar_width - 8`, faz *fallback* automático para `above`
   e emite `W105`.
 - `label_position="above"`: texto centralizado acima da barra, `size 6`.
-- Rótulo do marcador: acima do triângulo, `size 5.5`, ancorado ao centro.
+- Marcador individual: rótulo em `size 5.5` e data `dd/Mmm/yyyy` em `size 5`,
+  ambos acima do triângulo e ancorados ao centro.
 - Marcos: rótulo no topo da `MILESTONE_BAND`, na cor do estilo, negrito.
 
 ## 6. Medição de texto sem DOM
@@ -193,7 +213,7 @@ schema, então isso **não** é bump de `schema_version`.
 `components[].supplier` existe no domínio desde o schema 1.2 e **não aparece no
 gráfico**. O Gantt reproduz o arquivo de referência, que não tem coluna de
 fornecedor; acrescentar texto ali quebraria a fidelidade que esta SPEC protege.
-O fornecedor vive na Home, nas tabelas exportadas e na aba `Auditoria` do Excel
+O fornecedor vive na Visão geral, nas tabelas exportadas e na aba `Auditoria` do Excel
 — contextos de consulta, não de apresentação. Ver ADR-004 §4.
 
 ## 7. Legenda e chrome
@@ -216,3 +236,67 @@ superior esquerdo, `size 6`, negrito.
    texto com `x < ORIGIN_X`; `x(chart_start) == ORIGIN_X`.
 4. **Diff visual**: PNG gerado vs baseline com tolerância de pixel; falha abre
    artefato de diff para revisão humana.
+
+## 9. Cronograma compacto (`chart.variant = "compact"`)
+
+O slide OPR (SPEC-008) não comporta o Gantt completo na área executiva de
+704 × 206 px, e o painel de componentes consumiria espaço sem acrescentar valor
+à revisão do componente. O modelo resolve isso com uma faixa — a mesma
+informação, sem o chrome.
+
+**Não é uma segunda engine.** `buildCompactDisplayList()` emite as mesmas
+primitivas (`rect`, `line`, `text`, `poly`) e passa pelo mesmo `toSVG()`; preview
+e exportação continuam desenhando o mesmo display list (§1). O que muda é o que
+entra.
+
+### 9.1 O que sai
+
+Painel de componentes, caixa de legenda, faixa de título, bloco de identificação
+e logo. Também saem as **guias verticais de marco**: elas existem para alinhar o
+marco às linhas de componente, e aqui não há linhas de componente para alinhar.
+A linha de `Today` fica — é a referência que mais importa num slide de status.
+
+### 9.2 O que entra
+
+| faixa | altura | conteúdo |
+|---|---|---|
+| anos | 11 | retângulo `NAVY` por ano, rótulo branco 6,5 pt |
+| meses | 11 | células brancas com borda `NAVY`, inicial do mês 5,5 pt |
+| bandeirinhas | 15 por fileira | triângulo, nome 5,5 pt negrito, data 5 pt |
+| pistas | 11 (barra 9) | fases com as cores de status de §3 |
+
+Mês em 12 px. Data curta `23/Jun/2025` — `dd/mm/yyyy` num rótulo de 5 pt vira
+ambiguidade, e o modelo de referência também escreve o mês por extenso.
+
+### 9.3 Pistas por ocupação
+
+Sem painel à esquerda, a pista é calculada por ocupação. As atividades são
+ordenadas por início e cada uma cai na primeira pista livre. Sem
+`chart.component_id`, componentes diferentes podem dividir a pista quando não
+se sobrepõem. Com o filtro 1.13, somente as atividades do componente vinculado
+participam do empacotamento. O nome dentro da barra é truncado com reticências
+quando não cabe, nunca omitido.
+
+### 9.4 Bandeirinhas: marcos e marcadores juntos
+
+Marcos do programa e marcadores de atividade ocupam a mesma zona, empilhados em
+fileiras por colisão de rótulo. O marcador ganha uma **linha-guia fina** até a
+barra da sua fase — é assim que o modelo de referência liga `TKO1 Aug 20th` à
+barra `Tooling`. A cor segue a mesma regra do completo (`color_override`, senão
+`GATE`/`XGATE`): um marco não pode mudar de cor entre as duas vistas do mesmo
+projeto. Quando há `component_id`, os marcadores individuais seguem o filtro e
+os marcos do programa permanecem.
+
+### 9.5 Escala
+
+O display list cresce com os dados: um programa denso rende mais fileiras de
+bandeirinha e mais pistas, e a faixa é reduzida para caber na caixa do elemento,
+preservando a proporção. Com dados na forma da referência — três fileiras de
+marco e duas pistas — a faixa sai em torno de 1:1 dentro do card do OPR.
+
+### 9.6 Testes
+
+Ver SPEC-008 §7 e o grupo `SPEC-002 §9` em `tests/test-engine.mjs`: dimensão
+menor que a do completo, ausência de painel/legenda/logo/título, uma barra por
+atividade visível, uma bandeirinha por marco e por marcador, filtro por
+componente, respeito à ocultação, determinismo e ausência de coordenada inválida.

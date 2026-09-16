@@ -24,8 +24,9 @@ autocontido e offline. A UI avisa o tamanho do deck quando ele passa de 2 MB.
 
 ## 2. Conteúdo gerado é ponto de partida, não vínculo vivo
 
-"Gerar do projeto" monta capa, cronograma, marcos, fornecedores e achados a
-partir dos dados atuais. Depois disso, **os slides são independentes**: editar
+"Gerar do projeto" monta slides a partir dos dados atuais. O conjunto atual foi
+reduzido por ADR-014 à capa corporativa e ao cronograma. Depois disso, **os
+slides são independentes**: editar
 uma data no cronograma não reescreve o slide já montado.
 
 Foi decisão consciente, contra o instinto de manter tudo sincronizado. Um slide
@@ -34,7 +35,7 @@ reunião — e a perda é silenciosa. O caminho é o oposto: regerar é um cliqu
 explícito, e o botão diz que vai substituir o que está lá.
 
 Isso não contradiz a regra 8 do `CLAUDE.md` ("nada derivado é armazenado"): a
-Home continua sendo consulta pura e sempre recalculada. O deck é **autoria**,
+A Visão geral continua sendo consulta pura e sempre recalculada. O deck é **autoria**,
 não relatório — o que o usuário escreveu num slide é dado dele, não derivação.
 
 ## 3. PPTX escrito à mão, como o XLSX

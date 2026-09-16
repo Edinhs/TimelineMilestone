@@ -1,112 +1,129 @@
 # Timeline Studio
 
-Gerador de cronogramas de programa (Gantt + milestones) como **aplicativo
-executável offline** — substituto do workbook macro `Schedule Generator Tool`.
+Aplicativo offline para criar, revisar e exportar cronogramas de programa
+(Gantt + milestones), concebido como sucessor seguro do workbook com macros
+`Schedule Generator Tool`.
 
-> **Status: Wave 1 parcial.** Contrato, PRD, ADR e SPECs prontos + **app inicial rodando no navegador**.
+> **Estado atual:** protótipo funcional v0.3.0 em arquivo HTML único, contrato
+> de projeto 1.14 e suíte automatizada com 137 testes. A homologação visual e o
+> empacotamento em `.exe` ainda são gates pendentes. Consulte
+> [`docs/STATUS-ATUAL.md`](docs/STATUS-ATUAL.md).
 
-## Rodar agora
+## Executar
 
-Abra `app/timeline-studio.html` no navegador (duplo clique). Arquivo único,
-sem instalação, sem servidor, sem internet — o mesmo binário conceitual que
-virará `.exe` na Wave 3. Botão **Exemplo** traz o programa da referência. A logo institucional aparece no
-canto superior esquerdo e pode ser desligada em Projeto → Logo.
+Abra `app/timeline-studio.html` no Chrome ou Edge. Não há servidor, instalação
+ou chamada de rede em runtime.
 
-**Home:** aba padrão — painel de consulta e auditoria com os marcos do programa,
-todos os marcos individuais por componente (com fornecedor e situação), resumo
-por fornecedor e achados de auditoria. Tudo derivado do documento, nada
-armazenado.
+Para validar o projeto:
 
-**Interface:** cada painel é dividido em seções recolhíveis, com resumo do
-conteúdo no cabeçalho fechado e botões de expandir/recolher tudo. faixa de indicadores no topo (próximo marco, atrasos, avanço),
-tooltip e clique direto nas barras do gráfico para abrir a atividade, lista de
-validação navegável e temas **claro / escuro / automático** (o
-automático segue o sistema e muda junto com ele; `Ctrl+D` alterna). Botão **?**
-no cabeçalho lista os atalhos.
+```bash
+npm install
+npm test
+```
 
-**Vários projetos:** o seletor na barra superior troca o projeto ativo sem
-perder nada — os projetos ficam todos vivos em memória. `Salvar em…` escolhe a pasta e o
-arquivo — aponte para a pasta sincronizada do OneDrive/SharePoint e o time todo
-usa o mesmo workspace. Depois disso `Salvar` e `Ctrl+S` gravam sempre ali, e o
-botão `Auto` liga o salvamento automático. Se outra pessoa gravar no arquivo
-enquanto você trabalha, o app avisa antes de sobrescrever. O `•` na barra indica alterações pendentes; `Ctrl+S` salva.
+## Interface atual
 
-**Apresentação:** aba com editor de slides — a **capa segue o padrão Stellantis
-e é travada** (só o texto e a imagem de fundo mudam). Nas demais: texto, imagens,
-formas e tabelas posicionáveis por arrastar, layouts e tema pré-configurados, geração automática
-do deck a partir do projeto e exportação `.pptx`.
+A navegação principal e as ações ficam em um único menu superior compacto, com
+rolagem horizontal das abas em telas menores:
 
-**Identificação:** o cabeçalho do desenho mostra o rótulo de atualização e o
-**responsável** pelo cronograma, ambos editáveis na aba Projeto.
+- **Visão geral:** status executivo, indicadores, prioridades, auditoria e
+  Histórico de versões.
+- **Apresentação:** editor de slides com capa corporativa Stellantis
+  personalizável, geração essencial de capa + cronograma, modelos reutilizáveis
+  `.tlstpl` e exportação `.pptx`.
+- **OPR:** gera e sincroniza um slide individual para cada componente. Cada
+  slide reúne o cronograma filtrado, uma tabela nativa **Next Steps** e, por
+  opção, os blocos **Scope** e **Risk/Open Points**. Os slides vivem no mesmo
+  deck, saem juntos no `.pptx` e continuam editáveis na Apresentação.
+- **Projeto:** identificação, janela do eixo, legenda e dimensões do gráfico.
+- **Milestones:** criação e edição dos marcos globais.
+- **Timeline:** componentes, atividades e marcadores individuais.
 
-**Legenda:** em Projeto → *Legenda* dá para renomear cada status, trocar as três
-cores da barra, ocultar linhas e mudar o título da caixa — com amostra ao vivo e
-botão para voltar ao padrão. As chaves internas não mudam, então o arquivo
-continua válido.
+Editor e Preview permanecem lado a lado. O divisor entre eles pode ser
+arrastado, ajustado pelo teclado e restaurado com duplo clique; o editor nunca
+ultrapassa 50% da área útil. Em telas pequenas, as áreas ficam empilhadas.
+Tabelas largas usam rolagem dentro da própria seção, sem desaparecer fora da
+janela.
 
-**Dimensões:** em Projeto → *Dimensões do gráfico* dá para ajustar largura do
-mês, altura de linha e barra, painel de componentes, faixa de marcos e escala do
-texto — com predefinições Compacto / Padrão / Amplo. O ajuste é gravado no
-projeto, então o mesmo arquivo sai igual em qualquer máquina.
+## Recursos implementados
 
-**Exportar:** PNG 300 dpi, **PDF vetorial** (sob medida, A3 ou A4 paisagem),
-SVG e CSV.
+- Preview WYSIWYG com zoom, ajuste total/largura, interação nas barras e modo
+  **Tela cheia**.
+- Seções recolhíveis com resumo no cabeçalho e controles para expandir ou
+  recolher tudo.
+- Ocultação reversível de cada componente e milestone, sem excluir dados.
+- Legenda configurável por projeto: título, nomes, cores, visibilidade e
+  restauração do padrão.
+- Dimensões do cronograma configuráveis com predefinições.
+- Janela do eixo com os modelos **Ano > Mês** e **Mês > Semana ISO**, incluindo
+  rótulos `WeekNN` e largura semanal configurável.
+- Tema claro como padrão visual, com modos automático e escuro disponíveis; o
+  automático acompanha o sistema.
+- Validação navegável; erros bloqueiam exportação e avisos permanecem visíveis.
+- Portfólio com vários projetos no mesmo workspace.
+- Salvamento manual e automático em `.tlsws`, projeto isolado `.tlsproj` e
+  detecção de alteração externa quando a File System Access API está disponível.
+- Histórico aditivo das diferenças gerado após salvamentos bem-sucedidos.
+- Bancada de apresentação com alinhamento, camadas, clipboard, notas, ordem de
+  slides e projeto demonstrativo com capa corporativa e cronograma prontos.
+- Exportação PNG, PDF vetorial, SVG, CSV, XLSX e PPTX.
 
-**Ponte com o Excel:** `Excel: colar / copiar` importa e exporta blocos no layout
-real das abas `Input Timeline` e `Input Milestone`; `Exportar Excel` gera um
-`.xlsx` com essas duas abas mais a aba `Schedule` com o gráfico.
+## Arquivos e compatibilidade
+
+`.tlsws` é o formato principal de workspace com vários projetos. Cada projeto
+segue `contracts/project.schema.json`; o contrato atual é 1.14.
+
+Os nomes **Input Timeline** e **Input Milestone** continuam existindo apenas na
+ponte com o Excel legado. Na interface, as áreas correspondentes se chamam
+**Timeline** e **Milestones**.
+
+O `.xlsm` legado é referência e fonte de importação somente leitura. Nunca deve
+ser regravado por este projeto.
 
 ## Estrutura
 
-```
+```text
 timeline-studio/
-├── app/timeline-studio.html         # ★ app funcional — abra no navegador
-├── CLAUDE.md                        # contexto persistente + as 7 regras duras
+├── app/timeline-studio.html       # aplicação funcional
 ├── contracts/
-│   ├── project.schema.json          # ★ contrato congelado — a fonte da verdade
-│   ├── workspace.schema.json        # portfólio: N projetos num arquivo .tlsws
-│   └── fixture-teste.json           # projeto de exemplo derivado da referência
+│   ├── project.schema.json        # contrato do projeto, versão 1.14
+│   ├── workspace.schema.json      # envelope multiprojeto .tlsws
+│   └── fixture-teste.json         # referência automatizada
 ├── docs/
-│   ├── PRD.md                       # problema, escopo, métricas, riscos
-│   ├── ADR-001-stack.md             # por que pywebview + React + core Python
-│   ├── ADR-002-workspace.md         # por que .tlsws e por que nenhum storage do navegador
-│   ├── ADR-003-dimensoes.md         # dimensões por projeto e o bump 1.0 → 1.1
-│   ├── ADR-004-home-auditoria.md    # Home derivada, códigos A2xx e o campo fornecedor
-│   ├── ADR-005-legenda-editavel.md  # chaves fixas, aparência editável, padrão restaurável
-│   ├── ADR-006-apresentacao.md      # deck no documento, PPTX à mão, gerado ≠ vinculado
-│   ├── SPEC-001-dominio.md          # modelos, validação E0xx/W1xx, durações
-│   ├── SPEC-002-render.md           # display list, tokens visuais, camadas
-│   ├── SPEC-003-ui.md               # as duas telas de input + preview
-│   ├── SPEC-004-io.md               # .tlsproj, exports, import read-only do .xlsm
-│   ├── SPEC-005-packaging.md        # PyInstaller, riscos de antivírus, release
-│   ├── SPEC-006-home.md             # painel Home de consulta e auditoria
-│   ├── SPEC-007-apresentacao.md     # editor de slides e gerador PPTX
-│   ├── PLAN-paralelizacao.md        # waves e protocolo entre agentes
-│   └── assets/referencia.png        # saída do gerador legado (fonte visual)
-└── .claude/
-    ├── agents/                      # 6 subagentes com escopo disjunto
-    │   ├── spec-guardian.md         #   guarda contrato, escopo e fronteiras
-    │   ├── domain-modeler.md        #   core/domain, core/calc
-    │   ├── render-engineer.md       #   core/render
-    │   ├── ui-builder.md            #   frontend
-    │   ├── io-integrator.md         #   core/io, core/export
-    │   └── qa-validator.md          #   tests, audita as SPECs
-    └── skills/
-        ├── gantt-visual-language/   # linguagem visual do Gantt PHES
-        ├── timeline-project-schema/ # contrato, validação e durações
-        ├── xlsm-legacy-safety/      # como não destruir um .xlsm com shapes
-        └── exe-packaging/           # PyInstaller + frontend estático
+│   ├── STATUS-ATUAL.md            # implementação, evidências e gates pendentes
+│   ├── PRD.md                     # produto, escopo, métricas e riscos
+│   ├── ADR-001..015               # decisões arquiteturais
+│   ├── SPEC-001..008              # domínio, render, UI, IO, build e módulos
+│   ├── CHANGELOG.md               # alterações por versão
+│   └── assets/                    # referências e fundo corporativo da capa
+├── tests/                         # núcleo, interface e checagem de sintaxe
+├── CONTRIBUTING.md
+└── CLAUDE.md
 ```
 
-## Como continuar
+## Atalhos e interação
 
-1. Responder as **4 perguntas abertas** do `docs/PRD.md` §10 (a nº 4 bloqueia o
-   cálculo de semanas).
-2. Rodar a Wave 0 do `docs/PLAN-paralelizacao.md` (scaffolding + stubs).
-3. Disparar a Wave 1 com os quatro agentes em paralelo.
+- `Ctrl+S`: salvar.
+- `Ctrl+D`: alternar tema.
+- `Ctrl++`, `Ctrl+-` e `Ctrl+0`: zoom da Preview.
+- Divisor com foco: setas ajustam; `Shift` aumenta o passo; `Home`/`End`
+  aplicam os limites.
+- Duplo clique no divisor: restaura a largura responsiva.
+- `Esc`: sai da Preview em tela cheia.
 
-## Arquitetura em uma frase
+## Próximos gates
 
-`.tlsproj` (JSON) → domínio Pydantic → `LayoutModel` → **um** display list de
-primitivas → desenhado tanto pelo `<svg>` do preview quanto pelo exportador
-PNG/PDF — por isso o que você vê é exatamente o que sai.
+1. Homologar visualmente o fluxo completo no ambiente-alvo.
+2. Confirmar a paridade do cálculo de semanas com o VBA legado.
+3. Validar importação real de variantes anonimizadas do `.xlsm`.
+4. Executar o plano de empacotamento e validar o `.exe` em máquina limpa.
+5. Medir os requisitos não funcionais da release: inicialização, render,
+   tamanho do binário e comportamento do antivírus corporativo.
+
+## Arquitetura atual
+
+O protótipo usa um núcleo JavaScript puro dentro do mesmo HTML para domínio,
+validação, display list e exportadores. A interface consome essa mesma display
+list no SVG da Preview e nas exportações, reduzindo divergência entre o que o
+usuário vê e o que recebe. A arquitetura nativa planejada permanece registrada
+em `ADR-001` e `SPEC-005`, mas ainda não deve ser descrita como entregue.

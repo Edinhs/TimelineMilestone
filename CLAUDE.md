@@ -15,8 +15,9 @@ Documentos normativos, em ordem de precedência:
 `contracts/project.schema.json` → `contracts/workspace.schema.json` →
 `docs/PRD.md` → `docs/ADR-001-stack.md`, `docs/ADR-002-workspace.md`,
 `docs/ADR-003-dimensoes.md`, `docs/ADR-004-home-auditoria.md`,
-`docs/ADR-005-legenda-editavel.md`, `docs/ADR-006-apresentacao.md` →
-`docs/SPEC-001..007` → este arquivo.
+`docs/ADR-005-legenda-editavel.md`, `docs/ADR-006-apresentacao.md`,
+`docs/ADR-010-opr.md` →
+`docs/SPEC-001..008` → este arquivo.
 
 ## Estado atual
 
@@ -47,14 +48,19 @@ PyInstaller (build).
 Home e auditoria: `auditProgram` é do `domain-modeler` (SPEC-006 §2), a tela é
 do `ui-builder` (SPEC-006 §3).
 
+OPR: a aba e o editor de cards são do `ui-builder`; as formas OOXML do elemento
+`status` são do `io-integrator` (SPEC-008 §2 e §5).
+
 ## As sete regras duras
 
 1. **O contrato é congelado.** Campo novo em `project.schema.json` exige bump de
    `schema_version`, plano de migração e aprovação do usuário. Nunca edite de improviso.
-   Estado atual: **1.4** (1.1 `project.layout` — ADR-003; 1.2
+   Estado atual: **1.9** (1.1 `project.layout` — ADR-003; 1.2
    `components[].supplier` — ADR-004; 1.3 `project.legend` — ADR-005;
    1.4 `project.owner`; 1.5 `project.deck`; 1.6 `role`/`locked` em elementos
-   de slide — ADR-006). Todos
+   de slide — ADR-006; 1.7 ocultação individual — ADR-007; 1.8 histórico de
+   versões — ADR-008; 1.9 slide OPR: `layout:"opr"`, elemento `status` e
+   `runs[]` no texto — ADR-010; 1.10 `chart.variant` — SPEC-002 §9). Todos
    aditivos: documentos anteriores continuam válidos e o carregador promove sem
    transformar nada. As **chaves** do enum de status são intocáveis; só a
    aparência delas é editável.
@@ -114,6 +120,13 @@ python -m PyInstaller build/timeline-studio.spec
   `replace` que não encontra o alvo não avisa nada e deixa o arquivo pela
   metade — foi assim que `renderPreview` ficou sem `viewDims` e o zoom morreu.
   Depois de mexer no app, rode `node app/smoke-check.js`.
+- **Uma engine, um slide.** O OPR não tem editor próprio de desenho: a aba edita
+  os elementos do slide `layout:"opr"` que a Apresentação já desenha e o
+  exportador já escreve. Se aparecer a vontade de compilar um modelo paralelo
+  para slide, leia o ADR-010 §1 antes.
+- **Variante de gráfico não é engine nova.** `buildCompactDisplayList` emite as
+  mesmas primitivas e passa pelo mesmo `toSVG`. Um terceiro desenho entra do
+  mesmo jeito ou não entra.
 - **Handler de `input` nunca chama `render()`.** Remontar o painel destrói o
   campo em foco e o usuário perde o cursor a cada tecla. Use `touch()` e
   atualize o que precisa no lugar (SPEC-003 §4e).
